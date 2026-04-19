@@ -42,9 +42,9 @@ bloc2_exam_train/
 │   └── model.pkl         # Modèle entraîné
 │
 ├── logs/
-│   ├── ingest.log
-│   ├── etl.log
-│   └── train.log
+│   ├── ingest.log        # Logs ingestion des données
+│   ├── etl.log           # Logs du pipeline ETL
+│   └── train.log         # Logs entraînement du modèle
 │
 ├── docker-compose.yml    # Infrastructure Docker
 ├── .env                  # Variables d’environnement

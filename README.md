@@ -8,13 +8,13 @@ Ce projet a pour objectif de concevoir un pipeline complet de traitement de donn
 * leur transformation et leur nettoyage (ETL) ;
 * la construction d’une table analytique ;
 * le développement d’un modèle de machine learning pour prédire le risque de rupture de stock (`stockout_risk`) ;
+* le stockage des données dans une base PostgreSQL via Docker ;
 * la mise en place de tests de validation du pipeline.
 
 ---
 
 ## 🧱 Architecture du projet
 
-```
 bloc2_exam_train/
 │
 ├── data/
@@ -25,7 +25,12 @@ bloc2_exam_train/
 │   ├── ingest.py         # Ingestion des données
 │   ├── etl.py            # Transformation / nettoyage / agrégation
 │   ├── train.py          # Modèle de machine learning
-│   └── visualize.py      # Visualisations
+│   ├── visualize.py      # Visualisations
+│   ├── db.py             # Création des tables PostgreSQL (ORM)
+│   └── ingest_db.py      # Insertion des données en base
+│
+├── sql/
+│   └── queries.sql       # Requêtes SQL de vérification
 │
 ├── tests/
 │   └── test_pipeline.py  # Tests du pipeline
@@ -38,8 +43,9 @@ bloc2_exam_train/
 │   ├── etl.log
 │   └── train.log
 │
+├── docker-compose.yml    # Infrastructure Docker
+├── .env                  # Variables d’environnement
 └── README.md
-```
 
 ---
 
@@ -50,7 +56,6 @@ bloc2_exam_train/
 Script : `scripts/ingest.py`
 
 * Chargement des fichiers :
-
   * CSV : orders, products, stores
   * JSON : inventory, events
   * JSONL : reviews
@@ -66,37 +71,29 @@ Script : `scripts/etl.py`
 #### Étapes réalisées :
 
 * Nettoyage des données :
-
   * suppression des doublons
   * conversion des types
   * gestion des valeurs manquantes
 
 * Normalisation :
-
   * catégories produits
   * régions
 
 * Agrégations :
-
   * `sales_7d`, `sales_30d`
   * `avg_rating`
   * `web_signal`
 
 * Jointures :
-
   * produits + magasins + stock + ventes + avis + événements
 
 * Création de la table finale :
 
-```
 fact_stock_risk
-```
 
 #### Variable cible :
 
-```
 stockout_risk = 1 si stock faible ET demande récente élevée
-```
 
 ---
 
@@ -143,7 +140,37 @@ Objectif :
 
 ---
 
-### 5. Tests
+### 5. Base de données (Docker + PostgreSQL)
+
+#### Infrastructure :
+
+* Docker / Docker Compose
+* PostgreSQL
+* pgAdmin (interface graphique)
+
+#### Scripts :
+
+* `scripts/db.py` : création des tables via SQLAlchemy (ORM)
+* `scripts/ingest_db.py` : insertion des données nettoyées
+
+#### Tables créées :
+
+* dim_product
+* dim_store
+* fact_orders
+* fact_inventory
+* fact_stock_risk
+
+#### Contrôles SQL :
+
+* vérification des tables
+* comptage des lignes
+* détection des doublons
+* analyse de la variable cible
+
+---
+
+### 6. Tests
 
 Script : `tests/test_pipeline.py`
 
@@ -157,9 +184,7 @@ Tests réalisés :
 
 Résultat :
 
-```
 9 passed
-```
 
 ---
 
@@ -167,25 +192,27 @@ Résultat :
 
 ### Activation de l’environnement :
 
-```bash
 source .venv/bin/activate
-```
 
 ### Lancement complet :
 
-```bash
-python scripts/ingest.py
-python scripts/etl.py
-python scripts/train.py
-python scripts/visualize.py
-pytest -v
-```
+python scripts/ingest.py  
+python scripts/etl.py  
+python scripts/train.py  
+python scripts/visualize.py  
+python scripts/ingest_db.py  
+pytest -v  
+
+### Lancement de la base :
+
+docker compose up -d
 
 ---
 
 ## 📊 Résultats
 
 * Dataset final : `fact_stock_risk.csv`
+* Données stockées dans PostgreSQL
 * Modèle sauvegardé : `model.pkl`
 * Visualisations générées (PNG)
 
@@ -195,15 +222,15 @@ pytest -v
 
 ⚠️ Attention :
 
-* le dataset est déséquilibré (peu de cas de rupture)
-* la métrique doit être interprétée avec prudence
+* dataset déséquilibré (peu de cas de rupture)
+* métrique à interpréter avec prudence
 
 ---
 
 ## ⚠️ Limites
 
 * déséquilibre des classes (`stockout_risk`)
-* cible simplifiée (règle métier basique)
+* cible simplifiée (règle métier)
 * peu de features avancées
 * pas de validation croisée
 * pas d’optimisation d’hyperparamètres
@@ -216,25 +243,25 @@ pytest -v
 * améliorer la définition du risque
 * tester d’autres modèles (Logistic Regression, XGBoost)
 * ajouter du feature engineering
-* mettre en place une validation croisée
+* automatiser le pipeline
+* déployer une API ou dashboard
 
 ---
 
 ## 🔐 Sécurité & RGPD
 
 * aucune donnée personnelle sensible utilisée
-* anonymisation implicite des identifiants
-* logs limités aux erreurs techniques
+* anonymisation des identifiants
 * respect des bonnes pratiques de traitement des données
 
 ---
 
 ## 🌱 Sobriété & performance
 
-* modèle frugal (RandomForest simple)
+* modèle frugal (RandomForest)
 * pipeline optimisé (pandas)
-* pas de surconsommation de ressources
-* approche adaptée à un contexte réel et scalable
+* utilisation Docker maîtrisée
+* architecture scalable
 
 ---
 
@@ -244,6 +271,7 @@ Le pipeline développé permet :
 
 * une ingestion fiable des données
 * une transformation cohérente
+* un stockage structuré en base relationnelle
 * une construction analytique pertinente
 * une première modélisation prédictive
 

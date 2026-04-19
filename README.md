@@ -15,6 +15,8 @@ Ce projet a pour objectif de concevoir un pipeline complet de traitement de donn
 
 ## 🧱 Architecture du projet
 
+```
+
 bloc2_exam_train/
 │
 ├── data/
@@ -46,6 +48,8 @@ bloc2_exam_train/
 ├── docker-compose.yml    # Infrastructure Docker
 ├── .env                  # Variables d’environnement
 └── README.md
+
+```
 
 ---
 

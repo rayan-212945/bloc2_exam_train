@@ -32,6 +32,7 @@ bloc2_exam_train/
 │   └── ingest_db.py      # Insertion des données en base
 │
 ├── sql/
+│   ├── schema.sql        # Schema SQL des tables
 │   └── queries.sql       # Requêtes SQL de vérification
 │
 ├── tests/
